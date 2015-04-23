@@ -1,0 +1,36 @@
+= JRunning
+
+JRunning aims to provide a simple, easy and Open Sourced running application.
+
+It is composed of two main parts:
+
+- mobile: the android application you install on your phone
+- server: the server to deploy somewhere to collect the data
+
+== Mobile
+
+NOTE: only Android is supported today
+
+Mobile application is quite trivial today. You configure a server and your credentials and you have 3 buttons:
+
+- Start
+- Stop
+- Quit
+
+Under these 3 buttons you have a small detail panel (mainly debug panel ATM) with few information about the last received point.
+
+NOTE: location is taken from the GPS of your phone.
+
+== Server
+
+Server is under development. It only provide an endpoint matching mobile application expectation for now but it will soon
+go further providing a nice front and some more advanced features.
+
+== Wish list
+
+- phantom mode
+- google map integration
+- history management
+- statistic computing
+- reuse google account?
+- ...
