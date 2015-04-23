@@ -1,0 +1,28 @@
+== Build
+
+[source]
+----
+mvn install
+----
+
+== Debug
+
+[source]
+----
+mvn install android:deploy -Dandroid.device=emulator
+----
+
+NOTE: `-Dandroid.device=usb` will use a connected phone.
+
+Then open your application in your IDE, open DDMS and select the application to get the port number (on the right).
+
+Finally configure a remote connection in your IDE.
+
+== How can you help?
+
+- Testing
+- Simplifying setup (mvn good-plugin:setup which would download and install android-sdk + the right version would be awesome)
+- Better GUI (a good map when the server will be able to return enough data for instance)
+- More features
+- Supporting SSL
+- Any other good idea...
