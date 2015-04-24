@@ -9,11 +9,13 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.SecurityContext;
 
 @Secured
@@ -29,6 +31,7 @@ public class AgentResource {
 
     @POST
     @Path("point/{sessionId}")
+    @Consumes(MediaType.APPLICATION_JSON)
     public void addPoint(final Point point, @PathParam("sessionId") final long sessionId) {
         final RunningSession session = Objects.requireNonNull(em.find(RunningSession.class, sessionId));
         final RunningCheckPoint checkPoint = new RunningCheckPoint();

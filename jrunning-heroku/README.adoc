@@ -1,0 +1,14 @@
+= Heroku
+
+Some useful command once the repo is setup:
+
+[source]
+----
+$ heroku plugins:install https://github.com/heroku/heroku-repo.git # do only once
+$ heroku repo:purge_cache # clean maven cache for snapshots
+$ git commit ...
+$ git push heroku master
+$ heroku ps:restart web.1
+$ heroku logs --tail
+$ heroku stop web.1
+----

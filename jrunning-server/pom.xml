@@ -18,16 +18,13 @@
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <failOnMissingWebXml>false</failOnMissingWebXml>
-
-    <openejb.version>5.0.0-SNAPSHOT</openejb.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.openejb</groupId>
       <artifactId>javaee-api</artifactId>
-      <version>7.0-SNAPSHOT</version>
+      <version>${javaee-api.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -74,6 +71,16 @@
         </executions>
         <configuration>
           <includes>io/github/rmannibucau/jrunning/jpa/*.class</includes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
+          <archiveClasses>true</archiveClasses>
+          <attachClasses>true</attachClasses>
         </configuration>
       </plugin>
     </plugins>

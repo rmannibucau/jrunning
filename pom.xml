@@ -17,6 +17,10 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
+
+    <openejb.version>5.0.0-SNAPSHOT</openejb.version>
+    <tomee.version>2.0.0-SNAPSHOT</tomee.version>
+    <javaee-api.version>7.0-SNAPSHOT</javaee-api.version>
   </properties>
 
   <profiles>
@@ -33,6 +37,7 @@
       </activation>
       <modules>
         <module>jrunning-server</module>
+        <module>jrunning-heroku</module>
       </modules>
     </profile>
     <profile>
@@ -40,7 +45,15 @@
       <modules>
         <module>jrunning-mobile</module>
         <module>jrunning-server</module>
+        <module>jrunning-heroku</module>
       </modules>
     </profile>
   </profiles>
+
+  <repositories>
+    <repository>
+      <id>apache-snapshots</id>
+      <url>https://repository.apache.org/content/repositories/snapshots/</url>
+    </repository>
+  </repositories>
 </project>

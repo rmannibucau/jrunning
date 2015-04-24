@@ -20,9 +20,12 @@ public interface Configuration {
     @DefaultInt(3)
     int retries();
 
-    @DefaultLong(30)
+    @DefaultInt(15000)
+    int timeout();
+
+    @DefaultLong(15)
     long minSeconds();
 
-    @DefaultFloat(50)
+    @DefaultFloat(25)
     float minMeters();
 }

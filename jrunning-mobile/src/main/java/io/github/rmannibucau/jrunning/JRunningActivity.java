@@ -11,8 +11,9 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
-import android.util.Base64;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
@@ -29,14 +30,6 @@ import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.ViewById;
 import org.androidannotations.annotations.sharedpreferences.Pref;
 import org.androidannotations.api.sharedpreferences.StringPrefField;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
 
 import java.util.concurrent.TimeUnit;
 
@@ -69,16 +62,13 @@ public class JRunningActivity extends Activity implements LocationListener {
     @Bean
     protected Session session;
 
+    protected JRunningAgentClient client = new JRunningAgentClient(this);
+
     @Pref
     protected Configuration_ configuration;
 
-    private DefaultHttpClient client;
-
     @AfterViews
     protected void init() {
-        client = new DefaultHttpClient();
-        client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(configuration.retries().get(), true));
-
         url.setOnEditorActionListener(new StorePreference(configuration.url()));
         username.setOnEditorActionListener(new StorePreference(configuration.username()));
         password.setOnEditorActionListener(new StorePreference(configuration.password()));
@@ -109,21 +99,7 @@ public class JRunningActivity extends Activity implements LocationListener {
     @Click(R.id.start)
     public void start() {
         ensureGpsIsActivated();
-
-        String sId;
-        try {
-            sId = EntityUtils.toString(client.execute(configureSecurity(new HttpGet(url() + "agent/start"))).getEntity(), "UTF-8");
-        } catch (Exception e) {
-            Toast.makeText(this, "Server can't be contacted", Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        locationService.requestLocationUpdates(LocationManager.GPS_PROVIDER, TimeUnit.SECONDS.toMillis(configuration.minSeconds().get()), configuration.minMeters().get(), this);
-        start.setEnabled(false);
-        stop.setEnabled(true);
-
-        session.start(sId);
-        update("Running");
+        startSession();
     }
 
     @Click(R.id.stop)
@@ -132,7 +108,10 @@ public class JRunningActivity extends Activity implements LocationListener {
         detail.setText("Stop!");
         start.setEnabled(true);
         stop.setEnabled(false);
-        update("Stopped");
+
+        final long time = System.nanoTime();
+        session.updateLastLocation(locationService.getLastKnownLocation(LocationManager.GPS_PROVIDER), time);
+        update("Stopped", time);
         session.finish();
     }
 
@@ -147,51 +126,57 @@ public class JRunningActivity extends Activity implements LocationListener {
 
     @Override
     public void onLocationChanged(Location location) {
-        session.updateLastLocation(location);
-        update("Running");
+        final long time = System.nanoTime();
+        session.updateLastLocation(location, time);
+        update("Running", time);
     }
 
-    private void update(String state) {
+    private void update(String state, long time) {
         Location lastLocation = session.getLastLocation();
         if (lastLocation == null) {
             detail.setText(state);
         } else {
             detail.setText(
                     state + ". " +
-                            "Run duration " + TimeUnit.MILLISECONDS.toMinutes(session.getDuration()) + "mn, " +
-                            "Location = " + lastLocation.getLatitude() + "," + lastLocation.getLongitude() + ", " +
+                            "Run duration " + TimeUnit.NANOSECONDS.toMinutes(session.getDuration()) + "mn, " +
+                            "Location = " + lastLocation.getLongitude() + "," + lastLocation.getLatitude() + ", " +
                             "Points = " + session.getPoints());
-            post(lastLocation);
+            post(lastLocation, time);
         }
     }
 
-    @Background
-    protected void post(Location lastLocation) {
-        HttpPost post = configureSecurity(new HttpPost(url() + "agent/point/" + session.getId()));
-        try {
-            JSONObject object = new JSONObject();
-            object.put("timestamp", lastLocation.getTime());
-            object.put("altitude", lastLocation.getAltitude());
-            object.put("latitude", lastLocation.getLatitude());
-            object.put("longitude", lastLocation.getLongitude());
-            if (lastLocation.hasSpeed()) {
-                object.put("speed", lastLocation.getSpeed());
-            }
-            post.setEntity(new StringEntity(object.toString()));
-            client.execute(post);
-        } catch (Exception e) {
-            Toast.makeText(this, "Server can't be contacted", Toast.LENGTH_LONG).show();
+    @Background(serial = "running")
+    protected void startSession() {
+        final String sId = client.newSessionId();
+        if (sId == null) {
+            Toasts.bgText(JRunningActivity.this, "Server can't be contacted");
+            return;
         }
+
+        new Handler(Looper.getMainLooper())
+                .post(new Runnable() {
+                    @Override
+                    public void run() {
+                        locationService.requestLocationUpdates(
+                                LocationManager.GPS_PROVIDER,
+                                TimeUnit.SECONDS.toMillis(configuration.minSeconds().get()),
+                                configuration.minMeters().get(),
+                                JRunningActivity.this);
+
+                        start.setEnabled(false);
+                        stop.setEnabled(true);
+
+                        session.start(sId);
+                        update("Running", session.getStartTime());
+                    }
+                });
     }
 
-    private String url() {
-        final String u = url.getText().toString();
-        return u.endsWith("/") ? u : u + '/';
-    }
-
-    private <T extends HttpRequestBase> T configureSecurity(T request) {
-        request.setHeader("Authorization", "Basic " + Base64.encodeToString((username.getText() + ":" + password.getText()).getBytes(), Base64.NO_WRAP));
-        return request;
+    @Background(serial = "running")
+    protected void post(Location lastLocation, long time) {
+        if (!client.checkPoint(lastLocation, time)) {
+            Toasts.bgText(JRunningActivity.this, "Server can't be contacted");
+        }
     }
 
     @OnActivityResult(Activities.GPS_SETTINGS)
@@ -213,10 +198,7 @@ public class JRunningActivity extends Activity implements LocationListener {
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        if (!LocationManager.GPS_PROVIDER.equals(provider)) {
-            return;
-        }
-        Toast.makeText(this, "GPS lost: " + status + "(0=OUT_OF_SERVICE, 1=TEMPORARILY_UNAVAILABLE, 2=AVAILABLE)", Toast.LENGTH_LONG).show();
+        // no-op: not that relevant, GpsStatus.Listener could be if we need
     }
 
     @Override
@@ -232,7 +214,7 @@ public class JRunningActivity extends Activity implements LocationListener {
         if (!LocationManager.GPS_PROVIDER.equals(provider)) {
             return;
         }
-        Toast.makeText(this, "GPS loast!", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "GPS lost!", Toast.LENGTH_LONG).show();
     }
 
     private void ensureGpsIsActivated() {
@@ -256,6 +238,14 @@ public class JRunningActivity extends Activity implements LocationListener {
                     })
                     .show();
         }
+    }
+
+    public Configuration_ configuration() {
+        return configuration;
+    }
+
+    public Session session() {
+        return session;
     }
 
     private interface Activities {

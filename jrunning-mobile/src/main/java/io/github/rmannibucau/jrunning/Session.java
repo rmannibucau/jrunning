@@ -3,7 +3,7 @@ package io.github.rmannibucau.jrunning;
 import android.location.Location;
 import org.androidannotations.annotations.EBean;
 
-@EBean
+@EBean(scope = EBean.Scope.Singleton)
 public class Session {
     private long startTime;
     private long endTime;
@@ -12,15 +12,15 @@ public class Session {
     private int points = 0;
     private String id;
 
-    public void updateLastLocation(Location lastLocation) {
+    public void updateLastLocation(Location lastLocation, long time) {
         this.lastLocation = lastLocation;
-        this.endTime = lastLocation.getTime();
+        this.endTime = time;
         points++;
     }
 
     public void start(String sId) {
         id = sId;
-        startTime = System.currentTimeMillis();
+        startTime = System.nanoTime();
         lastLocation = null;
         running = true;
     }
@@ -38,7 +38,7 @@ public class Session {
     }
 
     public long getDuration() {
-        return endTime == 0 ? 0 : endTime - startTime;
+        return endTime == 0 ? 0 : (endTime - startTime);
     }
 
     public long getStartTime() {

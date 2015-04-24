@@ -17,7 +17,6 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

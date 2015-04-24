@@ -5,9 +5,6 @@
             http://maven.apache.org/POM/4.0.0
             http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <properties>
-    <androidannotations.version>3.2</androidannotations.version>
-  </properties>
 
   <parent>
     <groupId>com.github.rmannibucau</groupId>
@@ -18,6 +15,11 @@
   <artifactId>jrunning-mobile</artifactId>
   <name>JRunning :: Mobile</name>
   <packaging>apk</packaging>
+
+  <properties>
+    <androidannotations.version>3.2</androidannotations.version>
+    <maven.compiler.useIncrementalCompilation>false</maven.compiler.useIncrementalCompilation>
+  </properties>
 
   <dependencies>
     <dependency>

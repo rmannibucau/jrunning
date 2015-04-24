@@ -1,0 +1,6 @@
+jrunning {
+     org.apache.openejb.core.security.jaas.PropertiesLoginModule required
+         Debug=true
+         UsersFile="users.properties"
+         GroupsFile="groups.properties";
+};
