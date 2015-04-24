@@ -67,6 +67,7 @@ public class AgentResourceTest {
         final RunningSession runningSession = em.find(RunningSession.class, id);
         assertNotNull(runningSession);
         assertEquals("jonathan", runningSession.getUsername());
+        assertNotNull(runningSession.getDate());
 
         final Invocation.Builder pointInvocation = target.path("api/agent/point/{sessionId}")
                 .resolveTemplate("sessionId", runningSession.getId())

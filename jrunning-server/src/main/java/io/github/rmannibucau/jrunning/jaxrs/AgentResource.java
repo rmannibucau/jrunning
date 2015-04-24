@@ -4,6 +4,7 @@ import io.github.rmannibucau.jrunning.jaxrs.security.Secured;
 import io.github.rmannibucau.jrunning.jpa.RunningCheckPoint;
 import io.github.rmannibucau.jrunning.jpa.RunningSession;
 
+import java.util.Date;
 import java.util.Objects;
 import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.EntityManager;
@@ -50,6 +51,7 @@ public class AgentResource {
     public long newSession() {
         final RunningSession session = new RunningSession();
         session.setUsername(securityContext.getUserPrincipal().getName());
+        session.setDate(new Date());
         em.persist(session);
         em.flush();
         return session.getId();
