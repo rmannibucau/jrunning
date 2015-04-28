@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -18,9 +19,17 @@ public class RunningCheckPoint {
     private long id;
 
     private long timestamp;
+
+    @Column(precision = 18)
     private double altitude;
+
+    @Column(precision = 18)
     private double latitude;
+
+    @Column(precision = 18)
     private double longitude;
+
+    @Column(precision = 3)
     private float speed;
 
     @ManyToOne

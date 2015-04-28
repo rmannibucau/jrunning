@@ -50,7 +50,7 @@ public class JRunningAgentClient {
         return u.endsWith("/") ? u : u + '/';
     }
 
-    public boolean checkPoint(Location lastLocation, long time) {
+    public String checkPoint(Location lastLocation, long time) {
         try {
             JSONObject object = new JSONObject();
             object.put("timestamp", time); // location.getTime() is not correct most of the time
@@ -65,9 +65,9 @@ public class JRunningAgentClient {
             post.setHeader("Content-Type", "application/json");
             post.setEntity(new StringEntity(object.toString()));
             client.execute(post);
-            return true;
+            return null;
         } catch (Exception e) {
-            return false;
+            return e.getMessage();
         }
     }
 }

@@ -174,8 +174,9 @@ public class JRunningActivity extends Activity implements LocationListener {
 
     @Background(serial = "running")
     protected void post(Location lastLocation, long time) {
-        if (!client.checkPoint(lastLocation, time)) {
-            Toasts.bgText(JRunningActivity.this, "Server can't be contacted");
+        final String error = client.checkPoint(lastLocation, time);
+        if (error != null) {
+            Toasts.bgText(JRunningActivity.this, "Server can't be contacted: " + error);
         }
     }
 

@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
@@ -24,6 +25,7 @@ import static java.util.stream.Collectors.toList;
 
 @Secured
 @Path("report")
+@ApplicationScoped
 public class ReportResource {
     @Context
     private SecurityContext securityContext;

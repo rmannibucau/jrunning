@@ -24,7 +24,7 @@ If you start a small "mock" server locally you can access it from android emulat
 
 === Change GPS coordinates
 
-Once the emulator started connect on locahost:5554:
+Once the emulator started connect on localhost:5554:
 
 [source]
 ----
